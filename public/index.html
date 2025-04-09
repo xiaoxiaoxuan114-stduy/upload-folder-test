@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<body>
+<input type="file" id="folderUpload" webkitdirectory directory multiple>
+<script>
+  document.getElementById('folderUpload').addEventListener('change', async (e) => {
+    const files = e.target.files;
+    const formData = new FormData();
+
+    // 修复：编码中文路径
+    for (const file of files) {
+      const encodedPath = encodeURIComponent(file.webkitRelativePath);  // 关键修复点
+      formData.append('files', file, encodedPath);  // 使用编码后的路径
+    }
+
+    try {
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+      if (!result.success) {
+        alert(`上传失败: ${result.message}`);
+      } else {
+        alert('上传成功');
+      }
+    } catch (error) {
+      alert('网络错误: ' + error.message);
+    }
+  });
+</script>
+</body>
+</html>
